@@ -708,7 +708,7 @@
                 case 'eyebrow':
                     // Draw single eyebrow (upper arc)
                     ctx.beginPath();
-                    ctx.arc(x, y, 15 * scale, 0, Math.PI);
+                    ctx.arc(x, y, 15 * scale, Math.PI, 2 * Math.PI);
                     ctx.stroke();
                     break;
 
