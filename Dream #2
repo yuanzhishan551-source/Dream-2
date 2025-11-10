@@ -76,6 +76,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center 55%;
         }
 
         #interaction-layer {
@@ -525,6 +526,9 @@
                     offsetY = (size.height - drawHeight) / 2;
                 }
 
+                // Shift image down by 5% to match object-position: center 55%
+                offsetY += size.height * 0.05;
+
                 scratchCtx.filter = 'blur(10px)';
                 scratchCtx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
                 scratchCtx.filter = 'none';
@@ -563,6 +567,9 @@
                     offsetX = 0;
                     offsetY = (size.height - drawHeight) / 2;
                 }
+
+                // Shift image down by 5% to match object-position: center 55%
+                offsetY += size.height * 0.05;
 
                 ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
 
