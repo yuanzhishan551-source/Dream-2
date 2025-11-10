@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+French+Canon&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #initial-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #scratch-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Full screen SVG for lines */
+        #fullscreen-svg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        #face-container {
+            position: relative;
+            height: 100vh;
+            aspect-ratio: 3/4;
+            background: white;
+            overflow: visible;
+        }
+
+        #face-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #interaction-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: all;
+        }
+
+        .feature-box {
+            position: fixed;
+            background: white;
+            border: 2px solid black;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+            text-align: center;
+            z-index: 100;
+            font-family: 'IM Fell French Canon', serif;
+        }
+
+        .feature-box:hover {
+            background: #f0f0f0;
+        }
+
+        .feature-box.active {
+            background: black;
+            color: white;
+        }
+
+        /* Position boxes around the face */
+        #eyebrow-box {
+            top: 10vh;
+            left: 15vw;
+        }
+
+        #eye-box {
+            top: 10vh;
+            right: 15vw;
+        }
+
+        #nose-box {
+            bottom: 15vh;
+            left: 15vw;
+        }
+
+        #mouth-box {
+            bottom: 15vh;
+            right: 15vw;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            align-items: center;
+            z-index: 200;
+        }
+
+        button {
+            padding: 0.5rem 1.5rem;
+            border: 2px solid black;
+            background: white;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+            font-weight: 500;
+            font-family: 'IM Fell French Canon', serif;
+        }
+
+        button:hover {
+            background: black;
+            color: white;
+        }
+
+        .btn-complete {
+            background: black;
+            color: white;
+        }
+
+        .btn-complete:hover {
+            background: #333;
+        }
+
+        .btn-reset {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: black;
+            color: white;
+            z-index: 200;
+        }
+
+        .btn-reset:hover {
+            background: #333;
+        }
+
+        #canvas-container {
+            position: relative;
+            height: 100vh;
+            aspect-ratio: 3/4;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: crosshair;
+            z-index: 10;
+        }
+
+        .drag-line {
+            stroke: black;
+            stroke-width: 1.5;
+            pointer-events: none;
+        }
+
+        .drag-dot {
+            fill: black;
+            cursor: move;
+            pointer-events: all;
+        }
+
+        .drag-dot:hover {
+            fill: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Full screen SVG for lines and dots -->
+    <svg id="fullscreen-svg" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+        <!-- Lines and dots will be added dynamically -->
+    </svg>
+
+    <!-- Initial View -->
+    <div id="initial-view">
+        <div id="face-container">
+            <img id="face-image" src="https://i.pinimg.com/736x/4a/fb/56/4afb56638fd3e5ab984186c77f8d5bb1.jpg" alt="Face template">
+            
+            <div id="interaction-layer"></div>
+        </div>
+
+        <div class="feature-box" id="eyebrow-box" data-type="eyebrow" data-text="Eyebrow">Eyebrow</div>
+        <div class="feature-box" id="eye-box" data-type="eye" data-text="Eye">Eye</div>
+        <div class="feature-box" id="nose-box" data-type="nose" data-text="Nose">Nose</div>
+        <div class="feature-box" id="mouth-box" data-type="mouth" data-text="Mouth">Mouth</div>
+
+        <div class="controls">
+            <button class="btn-complete" id="btn-complete">Complete</button>
+        </div>
+    </div>
+
+    <!-- Scratch View -->
+    <div id="scratch-view" class="hidden">
+        <div id="canvas-container">
+            <canvas id="main-canvas"></canvas>
+            <canvas id="scratch-canvas"></canvas>
+        </div>
+        <button class="btn-reset" id="btn-reset">Reset</button>
+    </div>
+
+    <script>
+        const faceImageUrl = 'https://i.pinimg.com/736x/4a/fb/56/4afb56638fd3e5ab984186c77f8d5bb1.jpg';
+        
+        const featureStyles = {
+            'Eyebrow': { type: 'eyebrow', style: 'curved' },
+            'Eye': { type: 'eye', style: 'round' },
+            'Nose': { type: 'nose', style: 'normal' },
+            'Mouth': { type: 'mouth', style: 'smile' }
+        };
+
+        function getCanvasSize() {
+            const vh = window.innerHeight;
+            const width = vh * 0.75; // 3:4 aspect ratio
+            const height = vh;
+            return { width, height };
+        }
+
+        // Convert screen pixels to SVG viewBox coordinates (1920x1080)
+        function pixelToSVG(pixelX, pixelY) {
+            const svgX = (pixelX / window.innerWidth) * 1920;
+            const svgY = (pixelY / window.innerHeight) * 1080;
+            return { x: svgX, y: svgY };
+        }
+
+        let placedFeatures = [];
+        let activeBox = null;
+        let isDragging = false;
+        let dragLine = null;
+        let dragDot = null;
+        let isScratching = false;
+        let draggingFeature = null;
+
+        const fullscreenSvg = document.getElementById('fullscreen-svg');
+        const faceContainer = document.getElementById('face-container');
+        const interactionLayer = document.getElementById('interaction-layer');
+        const btnComplete = document.getElementById('btn-complete');
+        const initialView = document.getElementById('initial-view');
+        const scratchView = document.getElementById('scratch-view');
+        const mainCanvas = document.getElementById('main-canvas');
+        const scratchCanvas = document.getElementById('scratch-canvas');
+        const btnReset = document.getElementById('btn-reset');
+
+        // Feature box click - can be used multiple times
+        document.querySelectorAll('.feature-box').forEach(box => {
+            box.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                
+                activeBox = box;
+                isDragging = true;
+                box.classList.add('active');
+                
+                // Create line and dot
+                dragLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                dragLine.classList.add('drag-line');
+                fullscreenSvg.appendChild(dragLine);
+                
+                dragDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                dragDot.classList.add('drag-dot');
+                dragDot.setAttribute('r', '8');
+                fullscreenSvg.appendChild(dragDot);
+                
+                updateDragLine(e);
+            });
+        });
+
+        // Mouse move
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging && activeBox) {
+                updateDragLine(e);
+            } else if (draggingFeature) {
+                updateFeaturePosition(e);
+            }
+        });
+
+        // Mouse up anywhere to place feature
+        document.addEventListener('mouseup', (e) => {
+            if (isDragging && activeBox) {
+                // Place feature at mouse position
+                const svgCoords = pixelToSVG(e.clientX, e.clientY);
+                
+                // Also calculate face-relative coordinates
+                const faceRect = faceContainer.getBoundingClientRect();
+                const faceRelX = ((e.clientX - faceRect.left) / faceRect.width) * 300;
+                const faceRelY = ((e.clientY - faceRect.top) / faceRect.height) * 400;
+                
+                const feature = {
+                    text: activeBox.dataset.text,
+                    type: activeBox.dataset.type,
+                    svgX: svgCoords.x,
+                    svgY: svgCoords.y,
+                    faceX: faceRelX,
+                    faceY: faceRelY,
+                    id: Date.now()
+                };
+                
+                placedFeatures.push(feature);
+                renderFeatures();
+                
+                // Clean up
+                if (dragLine) dragLine.remove();
+                if (dragDot) dragDot.remove();
+                activeBox.classList.remove('active');
+                activeBox = null;
+                isDragging = false;
+                dragLine = null;
+                dragDot = null;
+            }
+            
+            // Stop dragging feature
+            if (draggingFeature) {
+                draggingFeature = null;
+            }
+        });
+
+        function updateDragLine(e) {
+            if (!dragLine || !dragDot || !activeBox) return;
+            
+            const boxRect = activeBox.getBoundingClientRect();
+            const startSvg = pixelToSVG(boxRect.left + boxRect.width / 2, boxRect.top + boxRect.height / 2);
+            const endSvg = pixelToSVG(e.clientX, e.clientY);
+            
+            dragLine.setAttribute('x1', startSvg.x);
+            dragLine.setAttribute('y1', startSvg.y);
+            dragLine.setAttribute('x2', endSvg.x);
+            dragLine.setAttribute('y2', endSvg.y);
+            
+            dragDot.setAttribute('cx', endSvg.x);
+            dragDot.setAttribute('cy', endSvg.y);
+        }
+
+        function updateFeaturePosition(e) {
+            if (!draggingFeature) return;
+            
+            const svgCoords = pixelToSVG(e.clientX, e.clientY);
+            draggingFeature.svgX = svgCoords.x;
+            draggingFeature.svgY = svgCoords.y;
+            
+            // Also update face-relative coordinates
+            const faceRect = faceContainer.getBoundingClientRect();
+            const faceRelX = ((e.clientX - faceRect.left) / faceRect.width) * 300;
+            const faceRelY = ((e.clientY - faceRect.top) / faceRect.height) * 400;
+            draggingFeature.faceX = faceRelX;
+            draggingFeature.faceY = faceRelY;
+            
+            renderFeatures();
+        }
+
+        function renderFeatures() {
+            // Clear existing features
+            const existingLines = fullscreenSvg.querySelectorAll('.feature-line');
+            existingLines.forEach(l => l.remove());
+            
+            const existingDots = fullscreenSvg.querySelectorAll('.feature-dot');
+            existingDots.forEach(d => d.remove());
+            
+            placedFeatures.forEach(feature => {
+                // Draw line from feature box to dot
+                const box = document.querySelector(`.feature-box[data-type="${feature.type}"]`);
+                if (box) {
+                    const boxRect = box.getBoundingClientRect();
+                    const startSvg = pixelToSVG(boxRect.left + boxRect.width / 2, boxRect.top + boxRect.height / 2);
+                    
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.classList.add('feature-line', 'drag-line');
+                    line.setAttribute('x1', startSvg.x);
+                    line.setAttribute('y1', startSvg.y);
+                    line.setAttribute('x2', feature.svgX);
+                    line.setAttribute('y2', feature.svgY);
+                    fullscreenSvg.appendChild(line);
+                }
+                
+                // Draw dot
+                const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                dot.classList.add('feature-dot', 'drag-dot');
+                dot.setAttribute('cx', feature.svgX);
+                dot.setAttribute('cy', feature.svgY);
+                dot.setAttribute('r', '8');
+                
+                // Only make dot draggable in initial view
+                if (!scratchView.classList.contains('hidden')) {
+                    // In scratch view, dots are not draggable
+                    dot.style.cursor = 'default';
+                } else {
+                    // In initial view, dots are draggable
+                    dot.addEventListener('mousedown', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        draggingFeature = feature;
+                    });
+                    
+                    // Double click to remove
+                    dot.addEventListener('dblclick', (e) => {
+                        e.stopPropagation();
+                        removeFeature(feature.id);
+                    });
+                }
+                
+                fullscreenSvg.appendChild(dot);
+            });
+        }
+
+        function removeFeature(id) {
+            placedFeatures = placedFeatures.filter(f => f.id !== id);
+            renderFeatures();
+        }
+
+        btnComplete.addEventListener('click', () => {
+            if (placedFeatures.length === 0) {
+                alert('Please place at least one feature!');
+                return;
+            }
+
+            const size = getCanvasSize();
+            mainCanvas.width = size.width;
+            mainCanvas.height = size.height;
+            scratchCanvas.width = size.width;
+            scratchCanvas.height = size.height;
+
+            // Switch views
+            initialView.classList.add('hidden');
+            scratchView.classList.remove('hidden');
+            
+            // Re-render features to update their behavior (hide lines, disable drag)
+            renderFeatures();
+            
+            // Hide only the lines after re-rendering
+            const lines = fullscreenSvg.querySelectorAll('.feature-line');
+            lines.forEach(line => line.style.display = 'none');
+            
+            drawBlurredFace();
+        });
+
+        function drawBlurredFace() {
+            const size = getCanvasSize();
+            drawRealFace();
+            
+            const scratchCtx = scratchCanvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = () => {
+                scratchCtx.filter = 'blur(10px)';
+                scratchCtx.drawImage(img, 0, 0, size.width, size.height);
+                scratchCtx.filter = 'none';
+                
+                // Don't draw text labels on the blurred layer
+                // User will scratch to reveal the real features underneath
+            };
+            
+            img.src = faceImageUrl;
+        }
+
+        function drawRealFace() {
+            const ctx = mainCanvas.getContext('2d');
+            const img = new Image();
+            const size = getCanvasSize();
+            
+            img.onload = () => {
+                ctx.clearRect(0, 0, size.width, size.height);
+                ctx.drawImage(img, 0, 0, size.width, size.height);
+
+                ctx.strokeStyle = '#000';
+                ctx.fillStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.textAlign = 'center';
+
+                placedFeatures.forEach(feature => {
+                    // Use the saved face coordinates
+                    const x = (feature.faceX / 300) * size.width;
+                    const y = (feature.faceY / 400) * size.height;
+                    const scale = size.width / 300;
+                    
+                    drawRealFeature(ctx, feature.text, x, y, scale);
+                });
+            };
+            
+            img.onerror = () => {
+                console.error('Failed to load image');
+            };
+            
+            img.src = faceImageUrl;
+        }
+
+        function drawRealFeature(ctx, text, x, y, scale = 1) {
+            const style = featureStyles[text];
+            if (!style) return;
+
+            ctx.save();
+
+            switch(style.type) {
+                case 'eyebrow':
+                    // Draw single eyebrow
+                    ctx.beginPath();
+                    ctx.arc(x, y, 15 * scale, Math.PI, 0, true);
+                    ctx.stroke();
+                    break;
+
+                case 'eye':
+                    // Draw single eye
+                    ctx.beginPath();
+                    ctx.arc(x, y, 8 * scale, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(x, y, 12 * scale, 0, Math.PI * 2);
+                    ctx.stroke();
+                    break;
+
+                case 'nose':
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - 15 * scale);
+                    ctx.lineTo(x - 8 * scale, y + 5 * scale);
+                    ctx.lineTo(x + 8 * scale, y + 5 * scale);
+                    ctx.closePath();
+                    ctx.stroke();
+                    break;
+
+                case 'mouth':
+                    ctx.beginPath();
+                    ctx.arc(x, y - 5 * scale, 25 * scale, 0.2, Math.PI - 0.2);
+                    ctx.stroke();
+                    break;
+            }
+
+            ctx.restore();
+        }
+
+        // Function to erase dots within a radius of the scratch position
+        function eraseDots(screenX, screenY, radius) {
+            const dots = fullscreenSvg.querySelectorAll('.feature-dot');
+            const svgCoords = pixelToSVG(screenX, screenY);
+            
+            dots.forEach(dot => {
+                const dotX = parseFloat(dot.getAttribute('cx'));
+                const dotY = parseFloat(dot.getAttribute('cy'));
+                
+                // Calculate distance in SVG coordinates
+                const distance = Math.sqrt(
+                    Math.pow(dotX - svgCoords.x, 2) + 
+                    Math.pow(dotY - svgCoords.y, 2)
+                );
+                
+                // Convert radius to SVG coordinates (approximate)
+                const svgRadius = (radius / window.innerWidth) * 1920;
+                
+                if (distance < svgRadius) {
+                    dot.style.opacity = '0';
+                    dot.style.pointerEvents = 'none';
+                }
+            });
+        }
+
+        // Scratch functionality
+        scratchCanvas.addEventListener('mousedown', () => {
+            isScratching = true;
+        });
+
+        scratchCanvas.addEventListener('mouseup', () => {
+            isScratching = false;
+        });
+
+        scratchCanvas.addEventListener('mouseleave', () => {
+            isScratching = false;
+        });
+
+        scratchCanvas.addEventListener('mousemove', (e) => {
+            if (!isScratching) return;
+
+            const rect = scratchCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Erase the scratch layer
+            const ctx = scratchCanvas.getContext('2d');
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 25, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Also erase dots in the fullscreen SVG at this location
+            eraseDots(e.clientX, e.clientY, 25);
+        });
+
+        // Touch support
+        scratchCanvas.addEventListener('touchstart', () => {
+            isScratching = true;
+        });
+
+        scratchCanvas.addEventListener('touchend', () => {
+            isScratching = false;
+        });
+
+        scratchCanvas.addEventListener('touchmove', (e) => {
+            if (!isScratching) return;
+            e.preventDefault();
+
+            const rect = scratchCanvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+
+            // Erase the scratch layer
+            const ctx = scratchCanvas.getContext('2d');
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 25, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Also erase dots in the fullscreen SVG at this location
+            eraseDots(touch.clientX, touch.clientY, 25);
+        });
+
+        // Reset
+        btnReset.addEventListener('click', () => {
+            placedFeatures = [];
+            
+            // Show all lines again
+            const lines = fullscreenSvg.querySelectorAll('.feature-line');
+            lines.forEach(line => line.style.display = '');
+            
+            // Restore all dots
+            const dots = fullscreenSvg.querySelectorAll('.feature-dot');
+            dots.forEach(dot => {
+                dot.style.opacity = '1';
+                dot.style.pointerEvents = 'all';
+            });
+            
+            renderFeatures();
+            scratchView.classList.add('hidden');
+            initialView.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
