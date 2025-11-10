@@ -289,10 +289,22 @@
     <script>
         const faceImageUrl = 'https://raw.githubusercontent.com/yuanzhishan551-source/Dream-2/main/face1.png';
         const eyebrowImageUrl = 'https://raw.githubusercontent.com/yuanzhishan551-source/Dream-2/main/eyebrows.png';
+        const eyeImageUrl = 'https://raw.githubusercontent.com/yuanzhishan551-source/Dream-2/main/eye2.png';
+        const noseImageUrl = 'https://raw.githubusercontent.com/yuanzhishan551-source/Dream-2/main/nose.png';
+        const mouthImageUrl = 'https://raw.githubusercontent.com/yuanzhishan551-source/Dream-2/main/Mouse.png';
 
-        // Preload eyebrow image
+        // Preload feature images
         const eyebrowImage = new Image();
         eyebrowImage.src = eyebrowImageUrl;
+
+        const eyeImage = new Image();
+        eyeImage.src = eyeImageUrl;
+
+        const noseImage = new Image();
+        noseImage.src = noseImageUrl;
+
+        const mouthImage = new Image();
+        mouthImage.src = mouthImageUrl;
 
         const featureStyles = {
             'Eyebrow': { type: 'eyebrow', style: 'curved' },
@@ -711,28 +723,54 @@
                     break;
 
                 case 'eye':
-                    // Draw single eye
-                    ctx.beginPath();
-                    ctx.arc(x, y, 8 * scale, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.arc(x, y, 12 * scale, 0, Math.PI * 2);
-                    ctx.stroke();
+                    // Draw eye image
+                    if (eyeImage.complete && eyeImage.naturalWidth > 0) {
+                        const baseWidth = 60 * scale;
+                        const baseHeight = (eyeImage.naturalHeight / eyeImage.naturalWidth) * baseWidth;
+                        const imgWidth = baseWidth * 2;
+                        const imgHeight = baseHeight * 3;
+                        ctx.drawImage(
+                            eyeImage,
+                            x - imgWidth / 2,
+                            y - imgHeight / 2,
+                            imgWidth,
+                            imgHeight
+                        );
+                    }
                     break;
 
                 case 'nose':
-                    ctx.beginPath();
-                    ctx.moveTo(x, y - 15 * scale);
-                    ctx.lineTo(x - 8 * scale, y + 5 * scale);
-                    ctx.lineTo(x + 8 * scale, y + 5 * scale);
-                    ctx.closePath();
-                    ctx.stroke();
+                    // Draw nose image
+                    if (noseImage.complete && noseImage.naturalWidth > 0) {
+                        const baseWidth = 60 * scale;
+                        const baseHeight = (noseImage.naturalHeight / noseImage.naturalWidth) * baseWidth;
+                        const imgWidth = baseWidth * 2;
+                        const imgHeight = baseHeight * 3;
+                        ctx.drawImage(
+                            noseImage,
+                            x - imgWidth / 2,
+                            y - imgHeight / 2,
+                            imgWidth,
+                            imgHeight
+                        );
+                    }
                     break;
 
                 case 'mouth':
-                    ctx.beginPath();
-                    ctx.arc(x, y - 5 * scale, 25 * scale, 0.2, Math.PI - 0.2);
-                    ctx.stroke();
+                    // Draw mouth image
+                    if (mouthImage.complete && mouthImage.naturalWidth > 0) {
+                        const baseWidth = 60 * scale;
+                        const baseHeight = (mouthImage.naturalHeight / mouthImage.naturalWidth) * baseWidth;
+                        const imgWidth = baseWidth * 2;
+                        const imgHeight = baseHeight * 3;
+                        ctx.drawImage(
+                            mouthImage,
+                            x - imgWidth / 2,
+                            y - imgHeight / 2,
+                            imgWidth,
+                            imgHeight
+                        );
+                    }
                     break;
             }
 
