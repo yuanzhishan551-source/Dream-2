@@ -679,7 +679,9 @@
         }
 
         function drawRealFeature(ctx, text, x, y, scale = 1) {
-            const style = featureStyles[text];
+            // Extract base feature type (e.g., "Eyebrow" from "Eyebrow-Joy")
+            const baseFeature = text.split('-')[0];
+            const style = featureStyles[baseFeature];
             if (!style) return;
 
             ctx.save();
