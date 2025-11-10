@@ -696,8 +696,10 @@
                 case 'eyebrow':
                     // Draw eyebrow image
                     if (eyebrowImage.complete && eyebrowImage.naturalWidth > 0) {
-                        const imgWidth = 60 * scale;
-                        const imgHeight = (eyebrowImage.naturalHeight / eyebrowImage.naturalWidth) * imgWidth;
+                        const baseWidth = 60 * scale;
+                        const baseHeight = (eyebrowImage.naturalHeight / eyebrowImage.naturalWidth) * baseWidth;
+                        const imgWidth = baseWidth * 2;  // Width 2x
+                        const imgHeight = baseHeight * 3; // Height 3x
                         ctx.drawImage(
                             eyebrowImage,
                             x - imgWidth / 2,
