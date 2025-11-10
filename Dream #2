@@ -706,9 +706,9 @@
 
             switch(style.type) {
                 case 'eyebrow':
-                    // Draw single eyebrow
+                    // Draw single eyebrow (upper arc)
                     ctx.beginPath();
-                    ctx.arc(x, y, 15 * scale, Math.PI, 0, true);
+                    ctx.arc(x, y, 15 * scale, 0, Math.PI);
                     ctx.stroke();
                     break;
 
@@ -723,11 +723,10 @@
                     break;
 
                 case 'nose':
+                    // Draw vertical line
                     ctx.beginPath();
                     ctx.moveTo(x, y - 15 * scale);
-                    ctx.lineTo(x - 8 * scale, y + 5 * scale);
-                    ctx.lineTo(x + 8 * scale, y + 5 * scale);
-                    ctx.closePath();
+                    ctx.lineTo(x, y + 15 * scale);
                     ctx.stroke();
                     break;
 
