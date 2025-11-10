@@ -194,8 +194,6 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
         }
 
         #scratch-canvas {
@@ -474,6 +472,12 @@
             mainCanvas.height = size.height;
             scratchCanvas.width = size.width;
             scratchCanvas.height = size.height;
+
+            // Set CSS dimensions to match canvas pixel dimensions
+            mainCanvas.style.width = size.width + 'px';
+            mainCanvas.style.height = size.height + 'px';
+            scratchCanvas.style.width = size.width + 'px';
+            scratchCanvas.style.height = size.height + 'px';
 
             // Switch views
             initialView.classList.add('hidden');
