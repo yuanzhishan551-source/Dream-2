@@ -111,6 +111,35 @@
             color: white;
         }
 
+        .feature-box.hidden-box {
+            display: none;
+        }
+
+        /* Emotion boxes in grid layout */
+        .emotion-box {
+            position: fixed;
+            background: white;
+            border: 2px solid black;
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+            text-align: center;
+            z-index: 100;
+            font-family: 'IM Fell French Canon', serif;
+        }
+
+        .emotion-box:hover {
+            background: #f0f0f0;
+        }
+
+        .emotion-box.active {
+            background: black;
+            color: white;
+        }
+
         /* Position boxes around the face */
         #eyebrow-box {
             top: 10vh;
@@ -286,6 +315,9 @@
         let dragDot = null;
         let isScratching = false;
         let draggingFeature = null;
+        let expandedFeatures = {}; // Track which features have been expanded
+
+        const emotions = ['Joy', 'Anger', 'Sorrow', 'Happiness'];
 
         const fullscreenSvg = document.getElementById('fullscreen-svg');
         const faceContainer = document.getElementById('face-container');
@@ -297,26 +329,79 @@
         const scratchCanvas = document.getElementById('scratch-canvas');
         const btnReset = document.getElementById('btn-reset');
 
-        // Feature box click - can be used multiple times
+        // Function to create emotion boxes in grid layout
+        function createEmotionBoxes(parentBox) {
+            const parentRect = parentBox.getBoundingClientRect();
+            const parentType = parentBox.dataset.type;
+
+            // Hide the parent box
+            parentBox.classList.add('hidden-box');
+            expandedFeatures[parentType] = true;
+
+            // Create 4 emotion boxes in 2x2 grid
+            const gridGap = 10; // gap between boxes
+            const boxWidth = 100;
+            const boxHeight = 45;
+
+            emotions.forEach((emotion, index) => {
+                const emotionBox = document.createElement('div');
+                emotionBox.className = 'emotion-box';
+                emotionBox.textContent = emotion;
+                emotionBox.dataset.type = parentType;
+                emotionBox.dataset.emotion = emotion;
+                emotionBox.dataset.text = `${parentBox.dataset.text}-${emotion}`;
+
+                // Calculate position in 2x2 grid
+                const row = Math.floor(index / 2);
+                const col = index % 2;
+
+                const left = parentRect.left + col * (boxWidth + gridGap);
+                const top = parentRect.top + row * (boxHeight + gridGap);
+
+                emotionBox.style.left = left + 'px';
+                emotionBox.style.top = top + 'px';
+
+                document.body.appendChild(emotionBox);
+
+                // Add mousedown event for dragging
+                emotionBox.addEventListener('mousedown', handleEmotionBoxMouseDown);
+            });
+        }
+
+        // Handle emotion box mousedown to start dragging
+        function handleEmotionBoxMouseDown(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            activeBox = e.target;
+            isDragging = true;
+            activeBox.classList.add('active');
+
+            // Create line and dot
+            dragLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            dragLine.classList.add('drag-line');
+            fullscreenSvg.appendChild(dragLine);
+
+            dragDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            dragDot.classList.add('drag-dot');
+            dragDot.setAttribute('r', '8');
+            fullscreenSvg.appendChild(dragDot);
+
+            updateDragLine(e);
+        }
+
+        // Feature box click to expand into emotion boxes
         document.querySelectorAll('.feature-box').forEach(box => {
-            box.addEventListener('mousedown', (e) => {
+            box.addEventListener('click', (e) => {
                 e.preventDefault();
-                
-                activeBox = box;
-                isDragging = true;
-                box.classList.add('active');
-                
-                // Create line and dot
-                dragLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                dragLine.classList.add('drag-line');
-                fullscreenSvg.appendChild(dragLine);
-                
-                dragDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                dragDot.classList.add('drag-dot');
-                dragDot.setAttribute('r', '8');
-                fullscreenSvg.appendChild(dragDot);
-                
-                updateDragLine(e);
+                e.stopPropagation();
+
+                const featureType = box.dataset.type;
+
+                // Only expand if not already expanded
+                if (!expandedFeatures[featureType]) {
+                    createEmotionBoxes(box);
+                }
             });
         });
 
@@ -719,18 +804,27 @@
         // Reset
         btnReset.addEventListener('click', () => {
             placedFeatures = [];
-            
+            expandedFeatures = {};
+
+            // Remove all emotion boxes
+            document.querySelectorAll('.emotion-box').forEach(box => box.remove());
+
+            // Restore original feature boxes
+            document.querySelectorAll('.feature-box').forEach(box => {
+                box.classList.remove('hidden-box');
+            });
+
             // Show all lines again
             const lines = fullscreenSvg.querySelectorAll('.feature-line');
             lines.forEach(line => line.style.display = '');
-            
+
             // Restore all dots
             const dots = fullscreenSvg.querySelectorAll('.feature-dot');
             dots.forEach(dot => {
                 dot.style.opacity = '1';
                 dot.style.pointerEvents = 'all';
             });
-            
+
             renderFeatures();
             scratchView.classList.add('hidden');
             initialView.classList.remove('hidden');
