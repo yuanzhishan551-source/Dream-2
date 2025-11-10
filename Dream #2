@@ -727,8 +727,8 @@
                     if (eyeImage.complete && eyeImage.naturalWidth > 0) {
                         const baseWidth = 60 * scale;
                         const baseHeight = (eyeImage.naturalHeight / eyeImage.naturalWidth) * baseWidth;
-                        const imgWidth = baseWidth * 2;
-                        const imgHeight = baseHeight * 3;
+                        const imgWidth = baseWidth * 1;      // Reduced to 1/2 of original 2x
+                        const imgHeight = baseHeight * 1.5;  // Reduced to 1/2 of original 3x
                         ctx.drawImage(
                             eyeImage,
                             x - imgWidth / 2,
@@ -744,8 +744,8 @@
                     if (noseImage.complete && noseImage.naturalWidth > 0) {
                         const baseWidth = 60 * scale;
                         const baseHeight = (noseImage.naturalHeight / noseImage.naturalWidth) * baseWidth;
-                        const imgWidth = baseWidth * 2;
-                        const imgHeight = baseHeight * 3;
+                        const imgWidth = baseWidth * 1;      // Reduced to 1/2 of original 2x
+                        const imgHeight = baseHeight * 1.5;  // Reduced to 1/2 of original 3x
                         ctx.drawImage(
                             noseImage,
                             x - imgWidth / 2,
@@ -761,8 +761,8 @@
                     if (mouthImage.complete && mouthImage.naturalWidth > 0) {
                         const baseWidth = 60 * scale;
                         const baseHeight = (mouthImage.naturalHeight / mouthImage.naturalWidth) * baseWidth;
-                        const imgWidth = baseWidth * 2;
-                        const imgHeight = baseHeight * 3;
+                        const imgWidth = baseWidth * 1;      // Reduced to 1/2 of original 2x
+                        const imgHeight = baseHeight * 1.5;  // Reduced to 1/2 of original 3x
                         ctx.drawImage(
                             mouthImage,
                             x - imgWidth / 2,
