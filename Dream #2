@@ -706,71 +706,35 @@
 
             switch(style.type) {
                 case 'eyebrow':
-                    // Draw eyebrow image
-                    if (eyebrowImage.complete && eyebrowImage.naturalWidth > 0) {
-                        const baseWidth = 60 * scale;
-                        const baseHeight = (eyebrowImage.naturalHeight / eyebrowImage.naturalWidth) * baseWidth;
-                        const imgWidth = baseWidth * 2.6;   // Width 2x * 1.3 = 2.6x
-                        const imgHeight = baseHeight * 3.9;  // Height 3x * 1.3 = 3.9x
-                        ctx.drawImage(
-                            eyebrowImage,
-                            x - imgWidth / 2,
-                            y - imgHeight / 2,
-                            imgWidth,
-                            imgHeight
-                        );
-                    }
+                    // Draw single eyebrow
+                    ctx.beginPath();
+                    ctx.arc(x, y, 15 * scale, Math.PI, 0, true);
+                    ctx.stroke();
                     break;
 
                 case 'eye':
-                    // Draw eye image
-                    if (eyeImage.complete && eyeImage.naturalWidth > 0) {
-                        const baseWidth = 60 * scale;
-                        const baseHeight = (eyeImage.naturalHeight / eyeImage.naturalWidth) * baseWidth;
-                        const imgWidth = baseWidth * 1;      // Reduced to 1/2 of original 2x
-                        const imgHeight = baseHeight * 1.5;  // Reduced to 1/2 of original 3x
-                        ctx.drawImage(
-                            eyeImage,
-                            x - imgWidth / 2,
-                            y - imgHeight / 2,
-                            imgWidth,
-                            imgHeight
-                        );
-                    }
+                    // Draw single eye
+                    ctx.beginPath();
+                    ctx.arc(x, y, 8 * scale, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(x, y, 12 * scale, 0, Math.PI * 2);
+                    ctx.stroke();
                     break;
 
                 case 'nose':
-                    // Draw nose image
-                    if (noseImage.complete && noseImage.naturalWidth > 0) {
-                        const baseWidth = 60 * scale;
-                        const baseHeight = (noseImage.naturalHeight / noseImage.naturalWidth) * baseWidth;
-                        const imgWidth = baseWidth * 1;      // Reduced to 1/2 of original 2x
-                        const imgHeight = baseHeight * 1.5;  // Reduced to 1/2 of original 3x
-                        ctx.drawImage(
-                            noseImage,
-                            x - imgWidth / 2,
-                            y - imgHeight / 2,
-                            imgWidth,
-                            imgHeight
-                        );
-                    }
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - 15 * scale);
+                    ctx.lineTo(x - 8 * scale, y + 5 * scale);
+                    ctx.lineTo(x + 8 * scale, y + 5 * scale);
+                    ctx.closePath();
+                    ctx.stroke();
                     break;
 
                 case 'mouth':
-                    // Draw mouth image
-                    if (mouthImage.complete && mouthImage.naturalWidth > 0) {
-                        const baseWidth = 60 * scale;
-                        const baseHeight = (mouthImage.naturalHeight / mouthImage.naturalWidth) * baseWidth;
-                        const imgWidth = baseWidth * 1;      // Reduced to 1/2 of original 2x
-                        const imgHeight = baseHeight * 1;    // Reduced height to 1x
-                        ctx.drawImage(
-                            mouthImage,
-                            x - imgWidth / 2,
-                            y - imgHeight / 2,
-                            imgWidth,
-                            imgHeight
-                        );
-                    }
+                    ctx.beginPath();
+                    ctx.arc(x, y - 5 * scale, 25 * scale, 0.2, Math.PI - 0.2);
+                    ctx.stroke();
                     break;
             }
 
