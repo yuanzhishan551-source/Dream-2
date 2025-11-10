@@ -471,27 +471,30 @@
             initialView.classList.add('hidden');
             scratchView.classList.remove('hidden');
 
-            // Now get the size from the visible container
-            const size = getCanvasSize();
-            mainCanvas.width = size.width;
-            mainCanvas.height = size.height;
-            scratchCanvas.width = size.width;
-            scratchCanvas.height = size.height;
+            // Wait for layout to complete before getting dimensions
+            requestAnimationFrame(() => {
+                // Now get the size from the visible container
+                const size = getCanvasSize();
+                mainCanvas.width = size.width;
+                mainCanvas.height = size.height;
+                scratchCanvas.width = size.width;
+                scratchCanvas.height = size.height;
 
-            // Set CSS dimensions to match canvas pixel dimensions
-            mainCanvas.style.width = size.width + 'px';
-            mainCanvas.style.height = size.height + 'px';
-            scratchCanvas.style.width = size.width + 'px';
-            scratchCanvas.style.height = size.height + 'px';
-            
-            // Re-render features to update their behavior (hide lines, disable drag)
-            renderFeatures();
-            
-            // Hide only the lines after re-rendering
-            const lines = fullscreenSvg.querySelectorAll('.feature-line');
-            lines.forEach(line => line.style.display = 'none');
-            
-            drawBlurredFace();
+                // Set CSS dimensions to match canvas pixel dimensions
+                mainCanvas.style.width = size.width + 'px';
+                mainCanvas.style.height = size.height + 'px';
+                scratchCanvas.style.width = size.width + 'px';
+                scratchCanvas.style.height = size.height + 'px';
+
+                // Re-render features to update their behavior (hide lines, disable drag)
+                renderFeatures();
+
+                // Hide only the lines after re-rendering
+                const lines = fullscreenSvg.querySelectorAll('.feature-line');
+                lines.forEach(line => line.style.display = 'none');
+
+                drawBlurredFace();
+            });
         });
 
         function drawBlurredFace() {
