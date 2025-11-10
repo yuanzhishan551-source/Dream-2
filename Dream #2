@@ -129,6 +129,8 @@
             text-align: center;
             z-index: 100;
             font-family: 'IM Fell French Canon', serif;
+            width: 100px;
+            box-sizing: border-box;
         }
 
         .emotion-box:hover {
@@ -419,12 +421,19 @@
             if (isDragging && activeBox) {
                 // Place feature at mouse position
                 const svgCoords = pixelToSVG(e.clientX, e.clientY);
-                
+
                 // Also calculate face-relative coordinates
                 const faceRect = faceContainer.getBoundingClientRect();
                 const faceRelX = ((e.clientX - faceRect.left) / faceRect.width) * 300;
                 const faceRelY = ((e.clientY - faceRect.top) / faceRect.height) * 400;
-                
+
+                // Save the source box position
+                const boxRect = activeBox.getBoundingClientRect();
+                const boxSvgCoords = pixelToSVG(
+                    boxRect.left + boxRect.width / 2,
+                    boxRect.top + boxRect.height / 2
+                );
+
                 const feature = {
                     text: activeBox.dataset.text,
                     type: activeBox.dataset.type,
@@ -432,9 +441,11 @@
                     svgY: svgCoords.y,
                     faceX: faceRelX,
                     faceY: faceRelY,
+                    sourceX: boxSvgCoords.x,
+                    sourceY: boxSvgCoords.y,
                     id: Date.now()
                 };
-                
+
                 placedFeatures.push(feature);
                 renderFeatures();
                 
@@ -491,25 +502,19 @@
             // Clear existing features
             const existingLines = fullscreenSvg.querySelectorAll('.feature-line');
             existingLines.forEach(l => l.remove());
-            
+
             const existingDots = fullscreenSvg.querySelectorAll('.feature-dot');
             existingDots.forEach(d => d.remove());
-            
+
             placedFeatures.forEach(feature => {
-                // Draw line from feature box to dot
-                const box = document.querySelector(`.feature-box[data-type="${feature.type}"]`);
-                if (box) {
-                    const boxRect = box.getBoundingClientRect();
-                    const startSvg = pixelToSVG(boxRect.left + boxRect.width / 2, boxRect.top + boxRect.height / 2);
-                    
-                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                    line.classList.add('feature-line', 'drag-line');
-                    line.setAttribute('x1', startSvg.x);
-                    line.setAttribute('y1', startSvg.y);
-                    line.setAttribute('x2', feature.svgX);
-                    line.setAttribute('y2', feature.svgY);
-                    fullscreenSvg.appendChild(line);
-                }
+                // Draw line from saved source position to dot
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.classList.add('feature-line', 'drag-line');
+                line.setAttribute('x1', feature.sourceX);
+                line.setAttribute('y1', feature.sourceY);
+                line.setAttribute('x2', feature.svgX);
+                line.setAttribute('y2', feature.svgY);
+                fullscreenSvg.appendChild(line);
                 
                 // Draw dot
                 const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
