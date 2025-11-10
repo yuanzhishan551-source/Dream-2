@@ -467,6 +467,11 @@
                 return;
             }
 
+            // Switch views first so container is visible
+            initialView.classList.add('hidden');
+            scratchView.classList.remove('hidden');
+
+            // Now get the size from the visible container
             const size = getCanvasSize();
             mainCanvas.width = size.width;
             mainCanvas.height = size.height;
@@ -478,10 +483,6 @@
             mainCanvas.style.height = size.height + 'px';
             scratchCanvas.style.width = size.width + 'px';
             scratchCanvas.style.height = size.height + 'px';
-
-            // Switch views
-            initialView.classList.add('hidden');
-            scratchView.classList.remove('hidden');
             
             // Re-render features to update their behavior (hide lines, disable drag)
             renderFeatures();
