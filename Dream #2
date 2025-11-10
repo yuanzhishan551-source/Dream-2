@@ -266,10 +266,10 @@
         };
 
         function getCanvasSize() {
-            const vh = window.innerHeight;
-            const width = vh * 0.75; // 3:4 aspect ratio
-            const height = vh;
-            return { width, height };
+            // Get the actual rendered size of the canvas container
+            const container = document.getElementById('canvas-container');
+            const rect = container.getBoundingClientRect();
+            return { width: rect.width, height: rect.height };
         }
 
         // Convert screen pixels to SVG viewBox coordinates (1920x1080)
