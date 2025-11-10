@@ -233,7 +233,7 @@
     <!-- Initial View -->
     <div id="initial-view">
         <div id="face-container">
-            <img id="face-image" src="https://i.pinimg.com/736x/4a/fb/56/4afb56638fd3e5ab984186c77f8d5bb1.jpg" alt="Face template">
+            <img id="face-image" src="https://raw.githubusercontent.com/yuanzhishan551-source/Dream-2/main/face1.png" alt="Face template">
             
             <div id="interaction-layer"></div>
         </div>
@@ -258,7 +258,7 @@
     </div>
 
     <script>
-        const faceImageUrl = 'https://i.pinimg.com/736x/4a/fb/56/4afb56638fd3e5ab984186c77f8d5bb1.jpg';
+        const faceImageUrl = 'https://raw.githubusercontent.com/yuanzhishan551-source/Dream-2/main/face1.png';
         
         const featureStyles = {
             'Eyebrow': { type: 'eyebrow', style: 'curved' },
