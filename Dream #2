@@ -500,19 +500,39 @@
         function drawBlurredFace() {
             const size = getCanvasSize();
             drawRealFace();
-            
+
             const scratchCtx = scratchCanvas.getContext('2d');
             const img = new Image();
-            
+
             img.onload = () => {
+                // Calculate dimensions for object-fit: cover effect
+                const imgRatio = img.naturalWidth / img.naturalHeight;
+                const canvasRatio = size.width / size.height;
+
+                let drawWidth, drawHeight, offsetX, offsetY;
+
+                if (imgRatio > canvasRatio) {
+                    // Image is wider, fit to height
+                    drawHeight = size.height;
+                    drawWidth = drawHeight * imgRatio;
+                    offsetX = (size.width - drawWidth) / 2;
+                    offsetY = 0;
+                } else {
+                    // Image is taller, fit to width
+                    drawWidth = size.width;
+                    drawHeight = drawWidth / imgRatio;
+                    offsetX = 0;
+                    offsetY = (size.height - drawHeight) / 2;
+                }
+
                 scratchCtx.filter = 'blur(10px)';
-                scratchCtx.drawImage(img, 0, 0, size.width, size.height);
+                scratchCtx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
                 scratchCtx.filter = 'none';
-                
+
                 // Don't draw text labels on the blurred layer
                 // User will scratch to reveal the real features underneath
             };
-            
+
             img.src = faceImageUrl;
         }
 
@@ -520,10 +540,31 @@
             const ctx = mainCanvas.getContext('2d');
             const img = new Image();
             const size = getCanvasSize();
-            
+
             img.onload = () => {
                 ctx.clearRect(0, 0, size.width, size.height);
-                ctx.drawImage(img, 0, 0, size.width, size.height);
+
+                // Calculate dimensions for object-fit: cover effect
+                const imgRatio = img.naturalWidth / img.naturalHeight;
+                const canvasRatio = size.width / size.height;
+
+                let drawWidth, drawHeight, offsetX, offsetY;
+
+                if (imgRatio > canvasRatio) {
+                    // Image is wider, fit to height
+                    drawHeight = size.height;
+                    drawWidth = drawHeight * imgRatio;
+                    offsetX = (size.width - drawWidth) / 2;
+                    offsetY = 0;
+                } else {
+                    // Image is taller, fit to width
+                    drawWidth = size.width;
+                    drawHeight = drawWidth / imgRatio;
+                    offsetX = 0;
+                    offsetY = (size.height - drawHeight) / 2;
+                }
+
+                ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
 
                 ctx.strokeStyle = '#000';
                 ctx.fillStyle = '#000';
@@ -535,15 +576,15 @@
                     const x = (feature.faceX / 300) * size.width;
                     const y = (feature.faceY / 400) * size.height;
                     const scale = size.width / 300;
-                    
+
                     drawRealFeature(ctx, feature.text, x, y, scale);
                 });
             };
-            
+
             img.onerror = () => {
                 console.error('Failed to load image');
             };
-            
+
             img.src = faceImageUrl;
         }
 
