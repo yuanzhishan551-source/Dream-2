@@ -288,7 +288,12 @@
 
     <script>
         const faceImageUrl = 'https://raw.githubusercontent.com/yuanzhishan551-source/Dream-2/main/face1.png';
-        
+        const eyebrowImageUrl = 'https://raw.githubusercontent.com/yuanzhishan551-source/Dream-2/main/eyebrows.png';
+
+        // Preload eyebrow image
+        const eyebrowImage = new Image();
+        eyebrowImage.src = eyebrowImageUrl;
+
         const featureStyles = {
             'Eyebrow': { type: 'eyebrow', style: 'curved' },
             'Eye': { type: 'eye', style: 'round' },
@@ -343,7 +348,7 @@
             // Create 4 emotion boxes in 2x2 grid
             const gridGap = 10; // gap between boxes
             const boxWidth = 100;
-            const boxHeight = 45;
+            const boxHeight = parentRect.height; // Same height as parent box
 
             emotions.forEach((emotion, index) => {
                 const emotionBox = document.createElement('div');
@@ -362,6 +367,7 @@
 
                 emotionBox.style.left = left + 'px';
                 emotionBox.style.top = top + 'px';
+                emotionBox.style.height = boxHeight + 'px';
 
                 document.body.appendChild(emotionBox);
 
@@ -688,10 +694,18 @@
 
             switch(style.type) {
                 case 'eyebrow':
-                    // Draw single eyebrow
-                    ctx.beginPath();
-                    ctx.arc(x, y, 15 * scale, Math.PI, 0, true);
-                    ctx.stroke();
+                    // Draw eyebrow image
+                    if (eyebrowImage.complete && eyebrowImage.naturalWidth > 0) {
+                        const imgWidth = 60 * scale;
+                        const imgHeight = (eyebrowImage.naturalHeight / eyebrowImage.naturalWidth) * imgWidth;
+                        ctx.drawImage(
+                            eyebrowImage,
+                            x - imgWidth / 2,
+                            y - imgHeight / 2,
+                            imgWidth,
+                            imgHeight
+                        );
+                    }
                     break;
 
                 case 'eye':
